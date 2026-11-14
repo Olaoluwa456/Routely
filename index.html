@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a36">
+  <meta name="description" content="ROUTELY — plan journeys, organise destinations, manage travel budgets and save itineraries.">
+  <title>ROUTELY — Travel, thoughtfully planned</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" aria-label="ROUTELY home">
+        <span class="brand-mark">R</span><span>ROUTELY<small>YOUR JOURNEY, ORGANISED</small></span>
+      </a>
+      <div class="side-label">WORKSPACE</div>
+      <nav class="nav">
+        <button class="nav-link active" data-view="dashboard"><span>▦</span> Overview</button>
+        <button class="nav-link" data-view="trips"><span>✈</span> My journeys</button>
+        <button class="nav-link" data-view="destinations"><span>⌖</span> Destinations</button>
+        <button class="nav-link" data-view="budget"><span>◷</span> Travel budget</button>
+        <button class="nav-link" data-view="saved"><span>▤</span> Saved itineraries</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="offline-card"><span class="status-dot"></span><div><b>Ready when you are</b><small>Your trips are saved on this device.</small></div></div>
+        <button class="nav-link" data-view="settings"><span>⚙</span> Settings & data</button>
+        <div class="side-foot">ROUTELY <span>•</span> PLAN BETTER. GO FURTHER.</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="mobile-menu" id="menuBtn" aria-label="Open menu">☰</button>
+        <div class="crumb">Workspace <span>/</span> <b id="pageName">Overview</b></div>
+        <div class="top-actions"><span class="today" id="today"></span><button class="avatar" id="settingsShortcut" title="Settings">R</button></div>
+      </header>
+      <div class="content" id="content"></div>
+      <footer class="footer">Made for the journey ahead <span>•</span> ROUTELY</footer>
+    </main>
+  </div>
+
+  <dialog id="tripDialog" class="modal">
+    <form id="tripForm" method="dialog">
+      <div class="modal-head"><div><div class="eyebrow">NEW ADVENTURE</div><h2 id="tripDialogTitle">Plan a journey</h2></div><button type="button" class="icon-btn" data-close="tripDialog">✕</button></div>
+      <input type="hidden" id="tripId">
+      <div class="form-grid">
+        <label class="full">Journey name<input id="tripName" required maxlength="70" placeholder="e.g. A week in Cape Town"></label>
+        <label>Starting point<input id="tripFrom" placeholder="Where are you starting?"></label>
+        <label>Main destination<input id="tripTo" required placeholder="Where are you going?"></label>
+        <label>Departure date<input id="tripStart" type="date"></label>
+        <label>Return date<input id="tripEnd" type="date"></label>
+        <label>Travellers<input id="tripPeople" type="number" min="1" max="99" value="1"></label>
+        <label>Trip status<select id="tripStatus"><option>Planning</option><option>Booked</option><option>Completed</option></select></label>
+        <label class="full">Journey notes<textarea id="tripNotes" rows="3" placeholder="Purpose, reminders, booking details…"></textarea></label>
+      </div>
+      <div class="modal-actions"><button type="button" class="btn secondary" data-close="tripDialog">Cancel</button><button class="btn primary" type="submit">Save journey</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="itemDialog" class="modal">
+    <form id="itemForm" method="dialog">
+      <div class="modal-head"><div><div class="eyebrow">TRIP DETAILS</div><h2 id="itemDialogTitle">Add itinerary item</h2></div><button type="button" class="icon-btn" data-close="itemDialog">✕</button></div>
+      <input type="hidden" id="itemTripId"><input type="hidden" id="itemId">
+      <div class="form-grid">
+        <label class="full">Activity or stop<input id="itemTitle" required maxlength="90" placeholder="e.g. Visit the waterfront"></label>
+        <label>Date<input id="itemDate" type="date"></label>
+        <label>Time<input id="itemTime" type="time"></label>
+        <label>Type<select id="itemType"><option>Sightseeing</option><option>Transport</option><option>Accommodation</option><option>Food</option><option>Activity</option><option>Other</option></select></label>
+        <label>Estimated cost<input id="itemCost" type="number" min="0" step="0.01" placeholder="0"></label>
+        <label class="full">Location / address<input id="itemLocation" placeholder="Place or address"></label>
+        <label class="full">Notes<textarea id="itemNotes" rows="2" placeholder="Useful details…"></textarea></label>
+      </div>
+      <div class="modal-actions"><button type="button" class="btn secondary" data-close="itemDialog">Cancel</button><button class="btn primary" type="submit">Save item</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="destinationDialog" class="modal">
+    <form id="destinationForm" method="dialog">
+      <div class="modal-head"><div><div class="eyebrow">YOUR PLACES</div><h2>Add a destination</h2></div><button type="button" class="icon-btn" data-close="destinationDialog">✕</button></div>
+      <div class="form-grid">
+        <label class="full">Destination name<input id="destName" required placeholder="e.g. Kyoto, Japan"></label>
+        <label>Country / region<input id="destCountry" placeholder="Country"></label>
+        <label>Category<select id="destCategory"><option>City</option><option>Nature</option><option>Beach</option><option>Culture</option><option>Adventure</option><option>Other</option></select></label>
+        <label class="full">Why visit? / Notes<textarea id="destNotes" rows="3" placeholder="Places to see, ideas, reminders…"></textarea></label>
+      </div>
+      <div class="modal-actions"><button type="button" class="btn secondary" data-close="destinationDialog">Cancel</button><button class="btn primary" type="submit">Save destination</button></div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>
